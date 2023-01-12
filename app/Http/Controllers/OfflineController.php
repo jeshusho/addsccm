@@ -21,7 +21,7 @@ class OfflineController extends Controller
             //$registros =  $request->all();
             //return $registros;
             foreach($registros as $r){
-                if($r->Inventario !== 'NO APLICA' ||  $r->Inventario !== 'SIN ETIQUETA' || $r->Inventario !=='' || !is_null($r->Inventario))
+                if($r->Inventario !== 'NO APLICA' &&  $r->Inventario !== 'SIN ETIQUETA' && $r->Inventario !=='' && !is_null($r->Inventario))
                 {
                     $data = [
                         'Equipo' => $r->Equipo,
@@ -68,9 +68,38 @@ class OfflineController extends Controller
                         ];
                     }
                 }
-    
+                else{
+                    return [
+                        'result' => 'Activo con inventario \'' . $r->Inventario . '\' no se puede guardar',
+                    ];
+                }
             }
+        }
+        else{
+            return [
+                "error" => 'api_key incorrecto o no enviado'
+            ];
+        }
+    }
 
+    public function deleting(Request $request, $rqapikey)
+    {
+        if($rqapikey === $this->apikey){
+            $registros =  json_decode(json_encode($request->all()));
+            foreach($registros as $r){
+                $reg = utpOfflineDevice::where('inventario',$r->Inventario)->first();
+                if(!is_null($reg)){
+                    utpOfflineDevice::where('inventario',$r->Inventario)->delete();
+                    return [
+                        'result' => 'Datos eliminados de activo ' . $r->Inventario,
+                    ];
+                }
+                else{
+                    return [
+                        'result' => 'Datos no encontrados del activo ' . $r->Inventario,
+                    ];
+                }
+            }
         }
         else{
             return [

@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('incoming/{apikey}', [OfflineController::class, 'incoming'])->name('incoming');
+Route::delete('deleting/{apikey}', [OfflineController::class, 'deleting'])->name('deleting');
