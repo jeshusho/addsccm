@@ -21,7 +21,8 @@ class OfflineController extends Controller
             //$registros =  $request->all();
             //return $registros;
             foreach($registros as $r){
-                if($r->Inventario !== 'NO APLICA' &&  $r->Inventario !== 'SIN ETIQUETA' && $r->Inventario !=='' && !is_null($r->Inventario))
+                //if($r->Inventario !== 'NO APLICA' &&  $r->Inventario !== 'SIN ETIQUETA' && $r->Inventario !=='' && !is_null($r->Inventario))
+                if( $r->Inventario !=='' && !is_null($r->Inventario))
                 {
                     $data = [
                         'Equipo' => $r->Equipo,
@@ -54,7 +55,25 @@ class OfflineController extends Controller
                         'FechaFinLeasing' => $r->FechaFinLeasing,
                     ];
         
-                    $reg = utpOfflineDevice::where('inventario',$r->Inventario)->first();
+                    $reg = utpOfflineDevice::where('Inventario',$r->Inventario)->first();
+                    if($r->Inventario === 'NO APLICA' ||  $r->Inventario === 'SIN ETIQUETA')
+                    {
+                        if($r->Serie !== 'NO APLICA' && $r->Serie !== 'POR VALIDAR' &&  $r->Serie !=='' && !is_null($r->Serie)){
+                            $reg = utpOfflineDevice::where('Marca',$r->Marca)->where('Modelo',$r->Modelo)->where('Serie',$r->Serie)->first();
+                        }
+                        else{
+                            if($r->Serie === 'POR VALIDAR')
+                            {
+                                return [
+                                    'result' => 'No se ha creado el activo con Serie ' . $r->Serie,
+                                ];
+                            }
+                            else if($r->Usuario !== 'NO APLICA' && $r->Usuario !== 'POR VALIDAR' &&  $r->Usuario !=='' && !is_null($r->Usuario))
+                            {
+                                $reg = utpOfflineDevice::where('Marca',$r->Marca)->where('Modelo',$r->Modelo)->where('Usuario',$r->Usuario)->where('DireccionSede',$r->DireccionSede)->first();
+                            }
+                        }
+                    }
                     if(!$reg){
                         utpOfflineDevice::create($data);
                         return [
